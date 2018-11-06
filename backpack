@@ -1,34 +1,39 @@
 #!/bin/sh
-if [ ! -t 1 -o ! $# -eq 1 -o ! -f ~/.backpack -a -z "$BACKPACK" ]; then
-	exec ssh "$@"
+
+config="/home/max/dotfiles/backpack.conf"
+echo "Heading to $1 with backpack"
+
+if [ ! -t 1 -o ! $# -eq 1 -o ! -f "$config" -a -z "$BACKPACK" ]; then
+    echo "backpack couldn't initialize, falling back to ssh"
+    exec ssh "$@"
 fi
 self="$(realpath "$0")"
 encode() {
-	base64 | tr -d "\n"
+    base64 | tr -d "\n"
 }
 if [ -z "$BACKPACK" ]; then
-	RC="$(encode < ~/.backpack)"
-	FUNCTION="$(encode <<EOF
+    RC="$(encode < $config)"
+    FUNCTION="$(encode <<EOF
 backpack() (
-	$(cat "$self")
+    $(cat "$self")
 )
 EOF
 )"
-	BACKPACK="$(encode <<EOF
+BACKPACK="$(encode <<EOF
 extract_backpack() {
-	exec "\$BASH" --rcfile <(
-		cat <<'EOF_2'
+    exec "\$BASH" --rcfile <(
+        cat <<'EOF_2'
 test -f /etc/profile && . /etc/profile
 for f in ~/.bash_profile ~/.bash_login ~/.profile; do
-	if [ -f "\$f" ]; then
-		. "\$f"
-		break
-	fi
+    if [ -f "\$f" ]; then
+        . "\$f"
+        break
+    fi
 done
 EOF_2
-		decode "$FUNCTION"
-		decode "$RC"
-	) -i;
+        decode "$FUNCTION"
+        decode "$RC"
+    ) -i;
 }
 EOF
 )"
@@ -38,6 +43,7 @@ cat <<EOF
 [ "\$SHELL" = "/bin/bash" ] && which base64 fold >/dev/null \
 && eval 'decode() { printf %s "\$1" | fold -w 64 | base64 -d; }' \
 && export BACKPACK="$BACKPACK" \
+&& export backpack_conf="$RC" \
 && eval "\$(decode "\$BACKPACK")" \
 && extract_backpack
 [ -x "\$SHELL" ] && exec "\$SHELL" -l
@@ -45,3 +51,50 @@ exec /bin/sh -i
 EOF
 )"
 exec ssh -t "$1" "$INIT"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
